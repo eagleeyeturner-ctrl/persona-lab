@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persona Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#17140F;
+    --panel:#1D1911;
+    --panel-raised:#241F15;
+    --line:#39331F;
+    --text:#EDE6D3;
+    --text-dim:#9C9480;
+    --amber:#D89544;
+    --amber-soft:rgba(216,149,68,0.14);
+    --sage:#7C9473;
+    --sage-soft:rgba(124,148,115,0.14);
+    --rose:#BE6E5F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+  }
+  header{
+    margin-bottom:28px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:20px;
+  }
+  h1{
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 6px;
+    letter-spacing:0.2px;
+  }
+  header p{
+    margin:0;
+    color:var(--text-dim);
+    font-size:13px;
+    line-height:1.5;
+    max-width:52ch;
+  }
+  section{
+    margin-bottom:32px;
+  }
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .section-head h2{
+    font-size:13px;
+    font-weight:600;
+    margin:0;
+    color:var(--text);
+  }
+  .section-head .count{
+    font-size:11px;
+    color:var(--text-dim);
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:18px;
+  }
+  label.field-label{
+    display:block;
+    font-size:11px;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+  input[type=text], input[type=password], textarea{
+    width:100%;
+    background:var(--panel-raised);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:10px 12px;
+    outline:none;
+  }
+  input[type=text]:focus, input[type=password]:focus, textarea:focus{
+    border-color:var(--amber);
+  }
+  textarea{
+    resize:vertical;
+    min-height:64px;
+    line-height:1.5;
+  }
+  .name-field{margin-bottom:16px;}
+
+  .trait-row{
+    margin-bottom:16px;
+  }
+  .trait-row:last-child{margin-bottom:0;}
+  .trait-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:4px;
+  }
+  .trait-name{
+    font-size:12.5px;
+    color:var(--text);
+  }
+  .trait-value{
+    font-size:12px;
+    color:var(--amber);
+    font-weight:500;
+    min-width:28px;
+    text-align:right;
+  }
+  input[type=range]{
+    -webkit-appearance:none;
+    width:100%;
+    height:16px;
+    background:transparent;
+    margin:0;
+    cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:3px;
+    background:var(--line);
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:11px;
+    height:11px;
+    margin-top:-4px;
+    background:var(--amber);
+    border-radius:1px;
+  }
+  input[type=range]::-moz-range-track{
+    height:3px;
+    background:var(--line);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:11px;
+    height:11px;
+    border:none;
+    background:var(--amber);
+    border-radius:1px;
+  }
+  .trait-caption{
+    font-size:11px;
+    color:var(--text-dim);
+    margin-top:5px;
+    line-height:1.4;
+  }
+  .trait-caption em{
+    color:var(--amber);
+    font-style:normal;
+  }
+
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    font-weight:500;
+    padding:10px 18px;
+    border:1px solid var(--amber);
+    background:var(--amber-soft);
+    color:var(--amber);
+    cursor:pointer;
+    letter-spacing:0.2px;
+  }
+  .btn:hover{background:rgba(216,149,68,0.24);}
+  .btn:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn.sage{border-color:var(--sage); background:var(--sage-soft); color:var(--sage);}
+  .btn.sage:hover{background:rgba(124,148,115,0.24);}
+  .btn.ghost{border-color:var(--line); background:transparent; color:var(--text-dim);}
+  .btn.ghost:hover{border-color:var(--text-dim); color:var(--text);}
+  .btn-row{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;}
+
+  .output{
+    margin-top:16px;
+    border-top:1px solid var(--line);
+    padding-top:16px;
+  }
+  .output-text{
+    font-family:'Source Serif 4', serif;
+    font-size:16px;
+    line-height:1.65;
+    color:var(--text);
+    white-space:pre-wrap;
+  }
+  .output-empty, .archive-empty{
+    color:var(--text-dim);
+    font-size:13px;
+    font-family:'IBM Plex Mono', monospace;
+    line-height:1.6;
+  }
+  .output-error{color:var(--rose); font-size:13px;}
+
+  .archive-list{
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .persona-card{
+    background:var(--panel);
+    padding:14px 16px;
+  }
+  .persona-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .persona-check{
+    width:14px;height:14px;
+    border:1px solid var(--text-dim);
+    flex-shrink:0;
+    cursor:pointer;
+    position:relative;
+  }
+  .persona-check.on{border-color:var(--sage); background:var(--sage-soft);}
+  .persona-check.on::after{
+    content:'';
+    position:absolute; inset:3px;
+    background:var(--sage);
+  }
+  .persona-name{
+    font-size:13px;
+    font-weight:600;
+    flex:1;
+  }
+  .persona-remove{
+    font-size:11px;
+    color:var(--text-dim);
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .persona-remove:hover{color:var(--rose);}
+  .spark{
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+    height:20px;
+    margin-top:10px;
+  }
+  .spark div{
+    flex:1;
+    background:var(--amber);
+    opacity:0.55;
+  }
+  .persona-prompt{
+    font-size:11px;
+    color:var(--text-dim);
+    margin-top:8px;
+    line-height:1.5;
+  }
+
+  .compare-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  .compare-card{
+    background:var(--panel);
+    padding:16px;
+  }
+  .compare-card h3{
+    font-size:13px;
+    margin:0 0 10px;
+  }
+  .compare-card .output-text{font-size:14.5px;}
+
+  .key-note{
+    font-size:11px;
+    color:var(--text-dim);
+    line-height:1.6;
+    margin-top:10px;
+  }
+  .key-status{
+    font-size:11px;
+    margin-top:8px;
+  }
+  .key-status.ok{color:var(--sage);}
+  .key-status.missing{color:var(--rose);}
+
+  footer{
+    margin-top:40px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-size:11px;
+    color:var(--text-dim);
+    line-height:1.6;
+  }
+
+  @media (min-width:680px){
+    .compare-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Persona Lab</h1>
+    <p>A voice is a point in ten-dimensional space. Set the dials, generate a passage, and see whether the traits show up in the prose — then save the voice and hold it against the others.</p>
+  </header>
+
+  <section>
+    <div class="section-head"><h2>Setup — API key</h2></div>
+    <div class="panel">
+      <label class="field-label">Anthropic API key</label>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+      <div class="btn-row">
+        <button class="btn" onclick="saveApiKey()">Save key</button>
+        <button class="btn ghost" onclick="clearApiKey()">Clear</button>
+      </div>
+      <div class="key-status" id="keyStatus"></div>
+      <div class="key-note">Stored only in this browser's local storage and sent directly from your device to api.anthropic.com — it never touches any server this page is hosted on. Anyone with access to this browser can read it, so don't use this on a shared or public machine, and don't commit a key into the page itself.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Signal — name and traits</h2></div>
+    <div class="panel">
+      <div class="name-field">
+        <label class="field-label">Persona name</label>
+        <input type="text" id="personaName" placeholder="e.g. The Skeptic, Cold Open Steve">
+      </div>
+      <div id="traitRows"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Transmission — generate</h2></div>
+    <div class="panel">
+      <label class="field-label">Prompt</label>
+      <textarea id="promptInput" placeholder="What should this voice write about? e.g. Explain why open protocols tend to outlast closed ones."></textarea>
+      <div class="btn-row">
+        <button class="btn" id="generateBtn" onclick="generate()">Generate</button>
+        <button class="btn sage" id="saveBtn" onclick="savePersona()" disabled>Save persona</button>
+      </div>
+      <div class="output">
+        <div id="outputArea" class="output-empty">Add your API key above, set the ten dials, write a prompt, then generate to hear the voice.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Archive — saved personas</h2>
+      <span class="count" id="archiveCount"></span>
+    </div>
+    <div id="archiveArea"></div>
+  </section>
+
+  <section id="compareSection" style="display:none;">
+    <div class="section-head"><h2>Comparison</h2></div>
+    <div class="panel" style="margin-bottom:1px;">
+      <label class="field-label">Shared prompt for regeneration</label>
+      <textarea id="comparePrompt" placeholder="Optional — regenerate all selected personas against the same prompt."></textarea>
+      <div class="btn-row">
+        <button class="btn" id="regenAllBtn" onclick="regenerateCompare()">Regenerate all</button>
+        <button class="btn ghost" onclick="clearSelection()">Clear selection</button>
+      </div>
+    </div>
+    <div class="compare-grid" id="compareGrid"></div>
+  </section>
+
+  <footer>
+    Persona Lab runs entirely in your browser. Personas are saved to this browser's local storage only — they will not appear on another device or browser, and clearing site data will remove them.
+  </footer>
+
+</div>
+
+<script>
+const STORAGE_KEY_PREFIX = 'personaLab.';
+const INDEX_KEY = STORAGE_KEY_PREFIX + 'index';
+const API_KEY_STORAGE = STORAGE_KEY_PREFIX + 'apiKey';
+
+const TRAITS = [
+  {key:'openness', label:'Openness', low:'sticks to the concrete and familiar, wary of abstraction', high:'reaches for metaphor, novelty, and aesthetic detail'},
+  {key:'intellect', label:'Intellect', low:'stays practical, avoids theory and reference', high:'leans on frameworks, theory, and named ideas'},
+  {key:'industriousness', label:'Industriousness', low:'lets a point trail off unfinished', high:'pushes every point through to a firm conclusion'},
+  {key:'orderliness', label:'Orderliness', low:'meanders, comfortable with loose structure', high:'organizes tightly, sequences ideas cleanly'},
+  {key:'enthusiasm', label:'Enthusiasm', low:'flat affect, few exclamations or jokes', high:'upbeat, energetic, quick with a joke'},
+  {key:'assertiveness', label:'Assertiveness', low:'hedges and qualifies, avoids a hard stance', high:'direct and declarative, takes the floor'},
+  {key:'compassion', label:'Compassion', low:'detached and analytical about people', high:'warm, attuned to how others might feel'},
+  {key:'politeness', label:'Politeness', low:'blunt, willing to risk offense', high:'deferential, softens every claim'},
+  {key:'withdrawal', label:'Withdrawal', low:'emotionally steady, little self-doubt shows', high:'anxious undertone, self-doubt leaks into the prose'},
+  {key:'volatility', label:'Volatility', low:'even-keeled, recovers fast from any charge', high:'sharper language, slow to cool down once charged'}
+];
+
+let traits = {};
+TRAITS.forEach(t => traits[t.key] = 50);
+
+let currentOutput = '';
+let currentPrompt = '';
+let personas = [];
+let selected = new Set();
+
+// ---------- API key handling ----------
+
+function getApiKey(){
+  return localStorage.getItem(API_KEY_STORAGE) || '';
+}
+
+function saveApiKey(){
+  const input = document.getElementById('apiKeyInput');
+  const val = input.value.trim();
+  if(!val){
+    renderKeyStatus();
+    return;
+  }
+  localStorage.setItem(API_KEY_STORAGE, val);
+  input.value = '';
+  renderKeyStatus();
+}
+
+function clearApiKey(){
+  localStorage.removeItem(API_KEY_STORAGE);
+  renderKeyStatus();
+}
+
+function renderKeyStatus(){
+  const status = document.getElementById('keyStatus');
+  if(getApiKey()){
+    status.className = 'key-status ok';
+    status.textContent = 'Key saved in this browser.';
+  }else{
+    status.className = 'key-status missing';
+    status.textContent = 'No key saved yet — generation will not work until one is added.';
+  }
+}
+
+// ---------- traits UI ----------
+
+function bucketText(t, v){
+  if(v >= 67) return t.high;
+  if(v <= 33) return t.low;
+  const towardHigh = v > 50;
+  return 'moderate, leaning ' + (towardHigh ? t.high : t.low);
+}
+
+function renderTraitRows(){
+  const container = document.getElementById('traitRows');
+  container.innerHTML = TRAITS.map(t => `
+    <div class="trait-row">
+      <div class="trait-top">
+        <span class="trait-name">${t.label}</span>
+        <span class="trait-value" id="val-${t.key}">${traits[t.key]}</span>
+      </div>
+      <input type="range" min="1" max="100" value="${traits[t.key]}" id="slider-${t.key}"
+        oninput="onSlide('${t.key}', this.value)">
+      <div class="trait-caption" id="cap-${t.key}"><em>${traits[t.key]>=67?'high':traits[t.key]<=33?'low':'moderate'}</em> — ${bucketText(t, traits[t.key])}</div>
+    </div>
+  `).join('');
+  TRAITS.forEach(t => updateSliderFill(t.key));
+}
+
+function updateSliderFill(key){
+  const el = document.getElementById('slider-'+key);
+  if(!el) return;
+  const v = traits[key];
+  el.style.background = `linear-gradient(90deg, var(--amber) 0%, var(--amber) ${v}%, transparent ${v}%)`;
+}
+
+function onSlide(key, value){
+  traits[key] = parseInt(value, 10);
+  document.getElementById('val-'+key).textContent = traits[key];
+  const t = TRAITS.find(x => x.key === key);
+  const level = traits[key]>=67?'high':traits[key]<=33?'low':'moderate';
+  document.getElementById('cap-'+key).innerHTML = `<em>${level}</em> — ${bucketText(t, traits[key])}`;
+  updateSliderFill(key);
+}
+
+// ---------- Claude API ----------
+
+function buildSystemPrompt(traitSet){
+  const lines = TRAITS.map(t => `- ${t.label} (${traitSet[t.key]}/100): ${bucketText(t, traitSet[t.key])}`).join('\n');
+  return `You are demonstrating personality-conditioned writing for a research tool. The ten-factor profile below (from the Openness/Intellect, Industriousness/Orderliness, Enthusiasm/Assertiveness, Compassion/Politeness, Withdrawal/Volatility model) should shape word choice, sentence rhythm, tone, and rhetorical habits — without ever naming the traits or describing the persona.\n\nProfile:\n${lines}\n\nWrite roughly 120-200 words responding to the user's prompt, fully in this voice, with no preamble, no meta-commentary, and no mention that this is a generated persona.`;
+}
+
+async function callClaude(systemPrompt, userPrompt){
+  const apiKey = getApiKey();
+  if(!apiKey){
+    throw new Error('no API key saved');
+  }
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{role: "user", content: userPrompt}]
+    })
+  });
+  if(!response.ok){
+    let detail = '';
+    try{
+      const errBody = await response.json();
+      detail = errBody?.error?.message ? ': ' + errBody.error.message : '';
+    }catch(e){ /* ignore parse failure */ }
+    throw new Error('API error ' + response.status + detail);
+  }
+  const data = await response.json();
+  return data.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+}
+
+async function generate(){
+  const promptEl = document.getElementById('promptInput');
+  const prompt = promptEl.value.trim();
+  const outputArea = document.getElementById('outputArea');
+  const genBtn = document.getElementById('generateBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  if(!getApiKey()){
+    outputArea.className = 'output-error';
+    outputArea.textContent = 'Add and save an API key above before generating.';
+    return;
+  }
+  if(!prompt){
+    outputArea.className = 'output-error';
+    outputArea.textContent = 'Write a prompt first — this voice needs something to write about.';
+    return;
+  }
+  genBtn.disabled = true;
+  genBtn.textContent = 'Generating…';
+  outputArea.className = 'output-empty';
+  outputArea.textContent = 'Listening for the signal…';
+  try{
+    const text = await callClaude(buildSystemPrompt(traits), prompt);
+    currentOutput = text;
+    currentPrompt = prompt;
+    outputArea.className = 'output-text';
+    outputArea.textContent = text;
+    saveBtn.disabled = false;
+  }catch(err){
+    outputArea.className = 'output-error';
+    outputArea.textContent = 'Generation failed — ' + err.message + '. Try again.';
+  }finally{
+    genBtn.disabled = false;
+    genBtn.textContent = 'Generate';
+  }
+}
+
+// ---------- persistence (localStorage) ----------
+
+function readIndex(){
+  try{
+    const raw = localStorage.getItem(INDEX_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function writeIndex(ids){
+  localStorage.setItem(INDEX_KEY, JSON.stringify(ids));
+}
+
+function loadPersonas(){
+  const ids = readIndex();
+  const loaded = [];
+  for(const id of ids){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY_PREFIX + id);
+      if(raw) loaded.push(JSON.parse(raw));
+    }catch(e){ /* skip corrupt entry */ }
+  }
+  loaded.sort((a,b) => b.createdAt - a.createdAt);
+  personas = loaded;
+  renderArchive();
+}
+
+function savePersona(){
+  const nameEl = document.getElementById('personaName');
+  const name = nameEl.value.trim() || 'Untitled voice';
+  const id = 'p' + Date.now();
+  const record = {
+    id, name,
+    traits: {...traits},
+    output: currentOutput,
+    prompt: currentPrompt,
+    createdAt: Date.now()
+  };
+  try{
+    localStorage.setItem(STORAGE_KEY_PREFIX + id, JSON.stringify(record));
+    const ids = readIndex();
+    ids.push(id);
+    writeIndex(ids);
+    loadPersonas();
+    nameEl.value = '';
+  }catch(e){
+    alert('Could not save persona — your browser storage may be full.');
+  }
+}
+
+function removePersona(id){
+  localStorage.removeItem(STORAGE_KEY_PREFIX + id);
+  writeIndex(readIndex().filter(x => x !== id));
+  selected.delete(id);
+  loadPersonas();
+  renderCompare();
+}
+
+function toggleSelect(id){
+  if(selected.has(id)) selected.delete(id);
+  else{
+    if(selected.size >= 3){ return; }
+    selected.add(id);
+  }
+  renderArchive();
+  renderCompare();
+}
+
+function clearSelection(){
+  selected.clear();
+  renderArchive();
+  renderCompare();
+}
+
+// ---------- rendering ----------
+
+function sparkline(traitSet){
+  return TRAITS.map(t => `<div style="height:${Math.max(traitSet[t.key],6)}%"></div>`).join('');
+}
+
+function renderArchive(){
+  const area = document.getElementById('archiveArea');
+  const count = document.getElementById('archiveCount');
+  count.textContent = personas.length ? personas.length + (personas.length === 1 ? ' voice' : ' voices') : '';
+  if(!personas.length){
+    area.innerHTML = '<div class="panel archive-empty">No personas saved yet. Generate a voice above, then save it to start building the archive.</div>';
+    return;
+  }
+  area.innerHTML = `<div class="archive-list">${personas.map(p => `
+    <div class="persona-card">
+      <div class="persona-top">
+        <div class="persona-check ${selected.has(p.id)?'on':''}" onclick="toggleSelect('${p.id}')"></div>
+        <div class="persona-name">${escapeHtml(p.name)}</div>
+        <button class="persona-remove" onclick="removePersona('${p.id}')">Remove</button>
+      </div>
+      <div class="spark">${sparkline(p.traits)}</div>
+      ${p.prompt ? `<div class="persona-prompt">"${escapeHtml(truncate(p.prompt, 90))}"</div>` : ''}
+    </div>
+  `).join('')}</div>`;
+}
+
+function renderCompare(){
+  const section = document.getElementById('compareSection');
+  const grid = document.getElementById('compareGrid');
+  const chosen = personas.filter(p => selected.has(p.id));
+  if(chosen.length < 2){
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  grid.innerHTML = chosen.map(p => `
+    <div class="compare-card">
+      <h3>${escapeHtml(p.name)}</h3>
+      <div class="spark" style="margin-bottom:12px;">${sparkline(p.traits)}</div>
+      <div class="output-text" id="compare-out-${p.id}">${p.output ? escapeHtml(p.output) : '<span class="output-empty">Not generated against this prompt yet.</span>'}</div>
+    </div>
+  `).join('');
+}
+
+async function regenerateCompare(){
+  const promptEl = document.getElementById('comparePrompt');
+  const prompt = promptEl.value.trim();
+  const btn = document.getElementById('regenAllBtn');
+  if(!getApiKey()){
+    alert('Add and save an API key first.');
+    return;
+  }
+  if(!prompt){
+    alert('Write a shared prompt first.');
+    return;
+  }
+  const chosen = personas.filter(p => selected.has(p.id));
+  btn.disabled = true;
+  btn.textContent = 'Regenerating…';
+  for(const p of chosen){
+    const target = document.getElementById('compare-out-'+p.id);
+    if(target) target.textContent = 'Listening for the signal…';
+    try{
+      const text = await callClaude(buildSystemPrompt(p.traits), prompt);
+      p.output = text;
+      p.prompt = prompt;
+      localStorage.setItem(STORAGE_KEY_PREFIX + p.id, JSON.stringify(p));
+      if(target) target.textContent = text;
+    }catch(e){
+      if(target) target.textContent = 'Generation failed — try again.';
+    }
+  }
+  personas = personas.map(existing => chosen.find(c => c.id === existing.id) || existing);
+  renderArchive();
+  btn.disabled = false;
+  btn.textContent = 'Regenerate all';
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+function truncate(s, n){
+  return s.length > n ? s.slice(0, n) + '…' : s;
+}
+
+renderTraitRows();
+renderKeyStatus();
+loadPersonas();
+</script>
+</body>
+</html>
